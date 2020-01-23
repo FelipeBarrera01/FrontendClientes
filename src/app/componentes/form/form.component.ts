@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 export class FormComponent implements OnInit {
   private cliente: Clientes;
   private titulo: string = "Crear cliente";
+  private errores: string[];
 
   constructor(private service: ClienteService, private router: Router, private activateRouter: ActivatedRoute) { }
 
@@ -38,6 +39,9 @@ export class FormComponent implements OnInit {
           showConfirmButton: false,
           timer: 1500
         });
+      },
+      err =>{
+        this.errores = err.error.errors as string[];
       }
     );
 
@@ -52,6 +56,9 @@ export class FormComponent implements OnInit {
         showConfirmButton: false,
         timer: 1500
       });
+    },
+    err =>{
+      this.errores = err.error.errors as string[];
     });
   }
 }
