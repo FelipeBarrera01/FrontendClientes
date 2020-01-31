@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ClienteService } from '../../cliente.service';
 import { Clientes } from '../../interfaces/Cliente';
 import Swal from 'sweetalert2';
+import { tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-clientes',
@@ -9,18 +11,41 @@ import Swal from 'sweetalert2';
   styleUrls: ['./clientes.component.css']
 })
 export class ClientesComponent implements OnInit {
-clientes:Clientes[] = []; 
-  constructor(private clienteService: ClienteService) { }
+
+
+  clientes: Clientes[] = [];
+  paginador:any;
+
+
+
+  constructor(private clienteService: ClienteService,
+    private routerActivate: ActivatedRoute
+  ) { }
 
   ngOnInit() {
-    this.clienteService.getClientes().subscribe(
-      clientes =>{
-        this.clientes = clientes;
-      }
 
-    );
+    this.routerActivate.paramMap.subscribe(params => {
+
+      let page:number = +params.get('page');
+      if(!page){
+        page = 0;
+      }
+      this.clienteService.getClientes(page).pipe(
+        tap((response: any) => {
+          (response.content as Clientes[]).forEach(cliente => {
+
+          });
+        })
+      ).subscribe(
+        response =>{
+          this.clientes = response.content as Clientes[];
+          this.paginador = response;
+          
+        } 
+      );
+    });
   }
-  delete(cliente:Clientes):void{
+  delete(cliente: Clientes): void {
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -28,7 +53,7 @@ clientes:Clientes[] = [];
       },
       buttonsStyling: false
     })
-    
+
     swalWithBootstrapButtons.fire({
       title: 'Estás seguro?',
       text: `Seguro  que desea eliminar al cliente ${cliente.nombre} ${cliente.apellido}`,
@@ -40,8 +65,8 @@ clientes:Clientes[] = [];
     }).then((result) => {
       if (result.value) {
         this.clienteService.delete(cliente.id).subscribe(
-          response =>{
-            this.clientes = this.clientes.filter(cli =>{
+          response => {
+            this.clientes = this.clientes.filter(cli => {
               cli !== cliente
             });
             swalWithBootstrapButtons.fire(
@@ -51,8 +76,8 @@ clientes:Clientes[] = [];
             )
           }
         );
-        
-      } 
+
+      }
     })
   }
 
