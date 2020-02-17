@@ -12,8 +12,11 @@ import {HttpClientModule} from '@angular/common/http';
 import { FormComponent } from './componentes/form/form.component';
 import {FormsModule} from '@angular/forms';
 import { PaginatorComponent } from './componentes/paginator/paginator.component';
-import {MatDatepickerModule, MatNativeDateModule} from '@angular/material';
+import {MatDatepickerModule} from '@angular/material';
+import { MatMomentDateModule} from '@angular/material-moment-adapter';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DetalleComponent } from './componentes/detalle/detalle.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -23,13 +26,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ClientesComponent,
     FormComponent,
     PaginatorComponent,
+    DetalleComponent,
 
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule,MatDatepickerModule, MatNativeDateModule, BrowserAnimationsModule
+    FormsModule,MatDatepickerModule, MatMomentDateModule, BrowserAnimationsModule
   ],
   providers: [ClienteService],
   bootstrap: [AppComponent]
