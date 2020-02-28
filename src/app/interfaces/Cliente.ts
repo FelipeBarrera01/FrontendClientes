@@ -6,5 +6,6 @@ export interface Clientes{
     apellido:string;
     createAt:string;
     email:string;
+    foto: string;
 
 }

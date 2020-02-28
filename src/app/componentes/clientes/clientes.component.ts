@@ -4,6 +4,7 @@ import { Clientes } from '../../interfaces/Cliente';
 import Swal from 'sweetalert2';
 import { tap } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
+import { ModalService } from 'src/app/modal.service';
 
 @Component({
   selector: 'app-clientes',
@@ -14,11 +15,12 @@ export class ClientesComponent implements OnInit {
 
 
   clientes: Clientes[] = [];
-  paginador:any;
-
+  paginador: any;
+  clienteSeleccionado: Clientes;
 
 
   constructor(private clienteService: ClienteService,
+    private modalService: ModalService,
     private routerActivate: ActivatedRoute
   ) { }
 
@@ -26,8 +28,8 @@ export class ClientesComponent implements OnInit {
 
     this.routerActivate.paramMap.subscribe(params => {
 
-      let page:number = +params.get('page');
-      if(!page){
+      let page: number = +params.get('page');
+      if (!page) {
         page = 0;
       }
       this.clienteService.getClientes(page).pipe(
@@ -37,13 +39,23 @@ export class ClientesComponent implements OnInit {
           });
         })
       ).subscribe(
-        response =>{
+        response => {
           this.clientes = response.content as Clientes[];
           this.paginador = response;
-          
-        } 
+
+        }
       );
     });
+    this.modalService.notificarUpload.subscribe(
+      cliente => {
+        this.clientes = this.clientes.map(clienteOriginal => {
+          if (cliente.id == clienteOriginal.id) {
+            clienteOriginal.foto = cliente.foto;
+          }
+          return clienteOriginal;
+        })
+      }
+    );
   }
   delete(cliente: Clientes): void {
     const swalWithBootstrapButtons = Swal.mixin({
@@ -80,5 +92,8 @@ export class ClientesComponent implements OnInit {
       }
     })
   }
-
+  abrirModal(cliente: Clientes) {
+    this.clienteSeleccionado = cliente;
+    this.modalService.abrirModal();
+  }
 }

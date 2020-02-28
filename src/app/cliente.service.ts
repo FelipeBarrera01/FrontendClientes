@@ -1,23 +1,24 @@
 import { Injectable } from '@angular/core';
 import { formatDate } from '@angular/common';
-import { Observable, throwError } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError, pipe } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpRequest, HttpEvent } from '@angular/common/http';
 import { Clientes } from './interfaces/Cliente';
 import { catchError, map, take, tap } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { url } from 'inspector';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClienteService {
-  private urlEndPoint: string = 'http://localhost:8080/api/clientes'
+  private urlEndPoint: string = 'http://localhost:9080/api/clientes'
   private httpHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
 
 
   constructor(private http: HttpClient, private router: Router) { }
-  getClientes(page:number): Observable<any[]> {
+  getClientes(page: number): Observable<any[]> {
 
     return this.http.get<Clientes[]>(this.urlEndPoint + '/page/' + page).pipe(
 
@@ -34,8 +35,8 @@ export class ClienteService {
         });
         return response;
       }),
-      tap(response =>{
-        (response.content as Clientes[]).forEach(cliente =>{
+      tap(response => {
+        (response.content as Clientes[]).forEach(cliente => {
 
         });
       })
@@ -98,6 +99,27 @@ export class ClienteService {
     );
   }
   delete(id: number): Observable<Clientes> {
-    return this.http.delete<Clientes>(`${this.urlEndPoint}/${id}`, { headers: this.httpHeaders });
+    return this.http.delete<Clientes>(`${this.urlEndPoint}/${id}`, { headers: this.httpHeaders }).pipe(
+      catchError(e => {
+        Swal.fire(e.error.mensaje, e.error.error, 'error');
+        return throwError(e);
+      }
+
+      )
+    );
   }
+
+  subirFoto(archivo: File, id): Observable<HttpEvent<{}>> {
+    let formData = new FormData();
+    formData.append('archivo', archivo);
+    formData.append('id', id);
+
+    const req = new HttpRequest('POST', `${this.urlEndPoint}/upload`, formData, {
+      reportProgress: true
+    });
+
+    return this.http.request(req) 
+  }
+
+
 }
