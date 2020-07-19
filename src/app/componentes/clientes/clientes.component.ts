@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { tap } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { ModalService } from 'src/app/modal.service';
+import { AuthService } from 'src/app/auth.service';
 
 @Component({
   selector: 'app-clientes',
@@ -21,7 +22,8 @@ export class ClientesComponent implements OnInit {
 
   constructor(private clienteService: ClienteService,
     private modalService: ModalService,
-    private routerActivate: ActivatedRoute
+    private routerActivate: ActivatedRoute,
+    private auth: AuthService
   ) { }
 
   ngOnInit() {
@@ -90,7 +92,7 @@ export class ClientesComponent implements OnInit {
         );
 
       }
-    })
+    });
   }
   abrirModal(cliente: Clientes) {
     this.clienteSeleccionado = cliente;

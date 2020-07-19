@@ -5,6 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
 import { HttpEventType } from '@angular/common/http';
 import { ModalService } from 'src/app/modal.service';
+import { AuthService } from 'src/app/auth.service';
+import { Factura } from 'src/app/interfaces/Factura';
+import { FacturasService } from 'src/app/facturas.service';
 
 @Component({
   selector: 'app-detalle',
@@ -16,17 +19,51 @@ export class DetalleComponent implements OnInit {
   @Input() cliente: Clientes;
   titulo: string = 'Detalle del cliente';
   private fotoSeleccionada: File;
-   progreso: number = 0;
+  progreso: number = 0;
 
   constructor(private service: ClienteService,
-              private modalService: ModalService
-   ) { }
+    private modalService: ModalService,
+    private auth: AuthService,
+    private facturaService: FacturasService
+  ) { }
 
   ngOnInit() {
- 
-  }
 
-  cerrarModal(){
+  }
+  delete(factura: Factura): void {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger'
+      },
+      buttonsStyling: false
+    })
+
+    swalWithBootstrapButtons.fire({
+      title: 'Estás seguro?',
+      text: `Seguro  que desea eliminar la factura ${factura.descripcion}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Si, eliminar',
+      cancelButtonText: 'No, cancelar',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.value) {
+        this.facturaService.delete(factura.id).subscribe(
+          response => {
+            this.cliente.facturas = this.cliente.facturas.filter(f => f !== factura );
+            swalWithBootstrapButtons.fire(
+              'Factura eliminada',
+              `Factura ${factura.descripcion} eliminado con éxito`,
+              'success'
+            )
+          }
+        );
+
+      }
+    });
+  }
+  cerrarModal() {
     this.modalService.cerrarModal();
     this.fotoSeleccionada = null;
     this.progreso = 0;
@@ -34,7 +71,7 @@ export class DetalleComponent implements OnInit {
 
   seleccionarFoto(event) {
     this.fotoSeleccionada = event.target.files[0];
-    this.progreso  = 0;
+    this.progreso = 0;
     if (this.fotoSeleccionada.type.indexOf('image') < 0) {
       Swal.fire(
         'Error seleccionar imagen: ',
